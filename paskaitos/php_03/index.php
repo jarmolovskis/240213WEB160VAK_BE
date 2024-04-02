@@ -16,31 +16,53 @@
     echo '<h2>' . __FILE__ . '</h2>';
 
     // print_r($_GET);
-
-    if (
-        isset($_GET['first_name'])
-        && $_GET['first_name'] != ''
-        && isset($_GET['city'])
-        && $_GET['city'] != ''
-    ) {
-        echo '<h2>Sveiki ' . $_GET['first_name'] . '. Kaip laikosi ' . $_GET['city'] . '?</h2>';
-        // Sveiki Kazimiras. Kaip laikosi Kaunas?
-    } else {
-        echo '<h2>Sveiki nepažįstamasis. Gal norite užsiregistruoti?</h2>';
-    }
-
     ?>
 
-    <form action="" method="GET">
+    <form action="http://localhost/240213WEB160VAK_BE/paskaitos/php_03/validation.php" method="GET">
         <label for="first_name_field">Vardas: </label>
         <input id="first_name_field" type="text" name="first_name" required>
         <br>
         <label for="city_field">Miestas: </label>
         <input id="city_field" type="text" name="city" required>
         <br>
-        <button>Pateikti</button>
+        <button id="form-action-btn">Pateikti</button>
+        <p id="errors"></p>
     </form>
 
+
+    <form action="http://localhost/240213WEB160VAK_BE/paskaitos/php_03/post_validation.php" method="POST">
+        <label for="first_name_field">Vardas: </label>
+        <input id="first_name_field" type="text" name="first_name" required>
+        <br>
+        <label for="city_field">Miestas: </label>
+        <input id="city_field" type="text" name="city" required>
+        <br>
+        <button id="form-action-btn">Pateikti</button>
+        <p id="errors"></p>
+    </form>
+
+
+
+    <script>
+
+        // let button = document.getElementById('form-action-btn');
+
+        // button.addEventListener('click', function(event) {
+
+        //     event.preventDefault();
+
+        //     document.getElementById('errors').innerText = '';
+
+        //     if (document.getElementById('first_name_field').value == '') {
+        //         document.getElementById('errors').append('Įveskite savo vardą. ');
+        //     }
+
+        //     if (document.getElementById('city_field').value == '') {
+        //         document.getElementById('errors').append('Įveskite savo miestą. ');
+        //     }
+        // });
+
+    </script>
     
 </body>
 </html>
