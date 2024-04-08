@@ -34,7 +34,7 @@
         }
 
         public function getPrivateProperty() {
-            echo $this->privateProperty;
+            // echo $this->privateProperty;
         }
 
         public function getProtectedProperty() {
