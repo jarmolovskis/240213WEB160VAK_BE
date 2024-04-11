@@ -1,3 +1,12 @@
+<?php
+
+    $includeBaseDir = 'D:/xampp/htdocs/240213WEB160VAK_BE/paskaitos/php_09';
+    $linksBaseDir = 'http://localhost/240213WEB160VAK_BE/paskaitos/php_09';
+
+?>
+
+<?php include "$includeBaseDir/database.php"; ?>
+
 <!doctype html>
 <html lang="en">
     <head>
