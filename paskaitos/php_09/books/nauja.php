@@ -5,29 +5,72 @@
 
 if (
     isset($_POST['name'])
-    && isset($_POST['author'])
+    && isset($_POST['author_name'])
+    && isset($_POST['author_surname'])
     && isset($_POST['page_number'])
     && isset($_POST['price'])
+    && isset($_POST['genre'])
 ) {
 
     $name = $_POST['name'];
-    $author = $_POST['author'];
+    $authorName = $_POST['author_name'];
+    $authorSurname = $_POST['author_surname'];
     $pageNumber = $_POST['page_number'];
     $price = $_POST['price'];
+    $genre_id = $_POST['genre'];
+
+
+    $sql = "SELECT * FROM `autoriai` WHERE `vardas` = '$authorName' AND `pavarde` = '$authorSurname';";
+    $authorResult = $conn->query($sql);
+
+    if ($authorResult->num_rows > 0) {
+
+        $authorId = $authorResult->fetch_assoc()['id'];
+
+    } else {
+
+        $sql = "INSERT INTO `autoriai` (`vardas`, `pavarde`) VALUES ('$authorName', '$authorSurname')";
+        $authorCreateResult = $conn->query($sql);
+
+        if ($authorCreateResult) {
+
+            $authorId = $conn->insert_id;
+
+        } else {
+
+            $authorId = null;
+        }
+    }
+
 
     // Teksines reiksmes reikia buti idejus i viengumas kabutes kaip '$name'
-    $sql = "INSERT INTO `knygos` (`pavadinimas`, `puslapiu_skaicius`, `kaina`) VALUES ('$name', $pageNumber, $price);";
+    $sql = "INSERT INTO `knygos` (`pavadinimas`, `puslapiu_skaicius`, `kaina`, `zanro_id`)
+        VALUES ('$name', $pageNumber, $price, $genre_id);";
+    $bookCreateResponse = $conn->query($sql);
 
-    $respnse = $conn->query($sql);
+    $relationshipCreateResponse = false;
 
-    if ($respnse) {
+    if ($authorId != null ) {
+
+        $newBookId = $conn->insert_id;
+
+        $sql = "INSERT INTO `knygu_autoriai` (`knygos_id`, `autoriaus_id`) VALUES ($newBookId, $authorId);";
+        $relationshipCreateResponse = $conn->query($sql);
+    }
+
+    if ($bookCreateResponse && $relationshipCreateResponse) {
         
         header('Location: ../knygos.php?created=success');
 
     } else {
+
         echo 'Kažkas blogai. Pabandykite dar kartą.';
     }
 }
+
+
+$sql = "SELECT * FROM `zanrai`;";
+$result = $conn->query($sql);
 
 ?>
 
@@ -52,13 +95,32 @@ if (
                                 <input type="text" class="form-control" id="nameInput" name="name">
                             </div>
                             <div class="mb-3">
-                                <label for="authorInput" class="form-label">Autorius</label>
-                                <input type="text" class="form-control" id="authorInput" name="author">
+                                <label for="authorNameInput" class="form-label">Autoriaus Vardas</label>
+                                <input type="text" class="form-control" id="authorNameInput" name="author_name">
                             </div>
-                            <!-- <div class="mb-3">
+                            <div class="mb-3">
+                                <label for="authorSurnameInput" class="form-label">Autoriaus pavardė</label>
+                                <input type="text" class="form-control" id="authorSurnameInput" name="author_surname">
+                            </div>
+
+                            <?php if ($result->num_rows > 0) { ?>
+
+                            <div class="mb-3">
                                 <label for="genreInput" class="form-label">Žanras</label>
-                                <input type="text" class="form-control" id="genreInput">
-                            </div> -->
+                                <select class="form-select" name="genre">
+                                    <option selected>Pasirinkite žanrą:</option>
+
+                                    <?php while ($zanras = $result->fetch_assoc()) { ?>
+
+                                        <option value="<?php echo $zanras['id']; ?>"><?php echo $zanras['pavadinimas']; ?></option>
+                                    
+                                    <?php } ?>
+
+                                </select>
+                            </div>
+
+                            <?php } ?>
+
                             <div class="mb-3">
                                 <label for="pagesInput" class="form-label">Puslapių sk.</label>
                                 <input type="number" class="form-control" id="pagesInput" name="page_number">

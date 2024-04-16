@@ -9,11 +9,13 @@
 
         if (isset($_GET['confirm']) && $_GET['confirm'] == 'true') {
             
-            $sql = "DELETE FROM `knygos` WHERE `id` = $bookId;";
+            $sql1 = "DELETE FROM `knygu_autoriai` WHERE `knygos_id` = $bookId;";
+            $response1 = $conn->query($sql1);
 
-            $response = $conn->query($sql);
+            $sql2 = "DELETE FROM `knygos` WHERE `id` = $bookId;";
+            $response2 = $conn->query($sql2);
 
-            if ($response) {
+            if ($response1 && $response2) {
                 header("Location: ../knygos.php?deleted=success");
             } else {
                 echo 'Kažkass negerai. Pabandykite dar kartą.';

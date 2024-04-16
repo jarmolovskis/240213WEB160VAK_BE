@@ -7,12 +7,20 @@
 
         $bookId = $_GET['id'];
 
-        $sql = "SELECT * FROM `knygos` WHERE `id` = $bookId";
+        $sql = "SELECT *
+            FROM `knygos`
+            JOIN `knygu_autoriai` ON `knygu_autoriai`.`knygos_id` = `knygos`.`id`
+            JOIN `autoriai` ON `autoriai`.`id` = `knygu_autoriai`.`autoriaus_id`
+            WHERE `knygos`.`id` = $bookId";
+        
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
 
-            $bookData = $result->fetch_assoc();
+            $bookData = $result->fetch_all(MYSQLI_ASSOC);
+
+            // print_r($bookData);
+            // $bookData = $result->fetch_assoc();
 
             $updateUrl = "$linksBaseDir/books/atnaujinti.php?id=$bookId";
             $deleteUrl = "$linksBaseDir/books/salinti.php?id=$bookId";
@@ -22,7 +30,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col">
-                        <h1 class="display-1">Knygos "<?php echo $bookData['pavadinimas']; ?>" informacija</h1>
+                        <h1 class="display-1">Knygos "<?php echo $bookData[0]['pavadinimas']; ?>" informacija</h1>
                         <p class="lead">Informacija apie knygą</p>
                     </div>
                 </div>
@@ -33,10 +41,26 @@
             <div class="container">
                 <div class="row">
                     <div class="col">
-                        <p><strong>Knygos pavadinimas: </strong> <?php echo $bookData['pavadinimas']; ?></p>
-                        <p><strong>Autorius: </strong> Kol kas palikim</p>
-                        <p><strong>Puslapių sk.: </strong> <?php echo $bookData['puslapiu_skaicius']; ?></p>
-                        <p><strong>Kaina: </strong> <?php echo $bookData['kaina']; ?> €</p>
+                        <p><strong>Knygos pavadinimas: </strong> <?php echo $bookData[0]['pavadinimas']; ?></p>
+
+                        <?php
+                        
+                            foreach ($bookData as $index => $singleBookData) {
+
+                                if (count($bookData) > 1) {
+                                    $authorLabel = 'Autorius ' . ++$index;
+                                } else {
+                                    $authorLabel = 'Autorius';
+                                }
+                        
+                        ?>
+
+                            <p><strong><?php echo $authorLabel; ?>: </strong> <?php echo $singleBookData['vardas'] . ' ' . $singleBookData['pavarde']; ?></p>
+
+                        <?php } ?>
+
+                        <p><strong>Puslapių sk.: </strong> <?php echo $bookData[0]['puslapiu_skaicius']; ?></p>
+                        <p><strong>Kaina: </strong> <?php echo $bookData[0]['kaina']; ?> €</p>
                         <p>
                             <a href="<?php echo $updateUrl; ?>" class="btn btn-warning">Atnaujinti</a>
                             <a href="<?php echo $deleteUrl; ?>" class="btn btn-danger">Šalinti</a>

@@ -3,11 +3,29 @@
 
 <?php
 
-    $sql = "SELECT `knygos`.`id`, `pavadinimas`, `puslapiu_skaicius`, `kaina`, GROUP_CONCAT(CONCAT(`vardas`, ' ', `pavarde`) SEPARATOR ', ') AS 'autorius'
+    $filtrationQuery = "";
+
+    if (isset($_GET['genre']) && $_GET['genre'] != 0) {
+
+        $genreId = $_GET['genre'];
+
+        $filtrationQuery = "WHERE `zanrai`.`id` = $genreId";
+    }
+
+    $sql = "SELECT
+        `knygos`.`id`,
+        `knygos`.`pavadinimas` AS 'knygos_pavadinimas',
+        `puslapiu_skaicius`,
+        `kaina`,
+        GROUP_CONCAT(CONCAT(`vardas`, ' ', `pavarde`) SEPARATOR ', ') AS 'autorius',
+        `zanrai`.`pavadinimas` AS 'zanro_pavadinimas'
         FROM `knygos`
-        JOIN `knygu_autoriai` ON `knygos`.`id` = `knygu_autoriai`.`knygos_id`
-        JOIN `autoriai` ON `knygu_autoriai`.`autoriaus_id` = `autoriai`.`id`
+        LEFT JOIN `knygu_autoriai` ON `knygos`.`id` = `knygu_autoriai`.`knygos_id`
+        LEFT JOIN `autoriai` ON `knygu_autoriai`.`autoriaus_id` = `autoriai`.`id`
+        JOIN `zanrai` ON `zanrai`.`id` = `knygos`.`zanro_id`
+        $filtrationQuery
         GROUP BY `knygos`.`id`;";
+        
     $result = $conn->query($sql);
 
 ?>
@@ -52,6 +70,38 @@
                 <p><a href="books/nauja.php" class="btn btn-success">Nauja knyga</a></p>
             </div>
         </div>
+
+        <?php
+
+            $sql = "SELECT * FROM `zanrai`;";
+            $genreResult = $conn->query($sql);
+
+            if ($genreResult->num_rows > 0) {
+
+        ?>
+
+        <div class="row">
+            <div class="col">
+                <form>
+                    <select name="genre" id="genreInput">
+                        <option value="0" selected>Pasirinkite žanrą:</option>
+                        
+                        <?php while ($zanras = $genreResult->fetch_assoc()) { ?>
+
+                            <option value="<?php echo $zanras['id']; ?>"><?php echo $zanras['pavadinimas']; ?></option>
+
+                        <?php } ?>
+
+                    </select>
+                    <button type="submit" class="btn btn-secondary">Filtruoti</button>
+                </form>
+            </div>
+        </div>
+
+        <?php } ?>
+
+
+
         <div class="row">
             <div class="col">
                 <table class="table table-hover">
@@ -60,7 +110,7 @@
                             <th scope="col">#</th>
                             <th scope="col">Pavadinimas</th>
                             <th scope="col">Autorius</th>
-                            <!-- <th scope="col">Žanras</th> -->
+                            <th scope="col">Žanras</th>
                             <th scope="col">Puslapių sk.</th>
                             <th scope="col">Kaina, €</th>
                             <th scope="col">Veiksmai</th>
@@ -77,9 +127,9 @@
 
                             <tr>
                                 <td scope="row"><?php echo $row['id']; ?></td>
-                                <td><?php echo $row['pavadinimas']; ?></td>
+                                <td><?php echo $row['knygos_pavadinimas']; ?></td>
                                 <td><?php echo $row['autorius']; ?></td>
-                                <!-- <td>Stulpelis</td> -->
+                                <td><?php echo $row['zanro_pavadinimas']; ?></td>
                                 <td><?php echo $row['puslapiu_skaicius']; ?></td>
                                 <td><?php echo $row['kaina']; ?></td>
                                 <td>
